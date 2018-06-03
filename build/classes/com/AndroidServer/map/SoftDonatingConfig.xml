@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <typeAliases>
+        <typeAlias alias="User" type="softdonating.entity.User"/>
+        <typeAlias alias="Book" type="softdonating.entity.Book"/>
+        <typeAlias alias="Donate" type="softdonating.entity.Donate"/>
+        <typeAlias alias="Take" type="softdonating.entity.Take"/>
+        <typeAlias alias="Follow" type="softdonating.entity.Follow"/>
+    </typeAliases>
+
+    <environments default="development">
+        <environment id="development">
+
+            <transactionManager type="JDBC"/>
+
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/softdonating"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+
+
+    <!-- pojo的映射文件UserMapper引入到配入到配置文件中 -->
+    <mappers>
+        <mapper class="softdonating.map.UserMapper"/>
+        <mapper class="softdonating.map.BookMapper"/>
+        <mapper class="softdonating.map.DonateMapper"/>
+        <mapper class="softdonating.map.TakeMapper"/>
+        <mapper class="softdonating.map.FollowMapper"/>
+    </mappers>
+</configuration>
