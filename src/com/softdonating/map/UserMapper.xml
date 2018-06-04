@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softdonating.map.UserMapper">
+
+    <insert id="createUser" parameterType="User" statementType="PREPARED">
+        insert into User (u_ID,name,photo,faculty,grade,phone_number) values
+        (#{u_ID},#{name},#{photo},#{faculty},#{grade},#{phone_number})
+    </insert>
+
+</mapper>
