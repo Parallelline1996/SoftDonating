@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.softdonating.domain">
+
+    <class name="Donate" table="Donate">
+    
+        <id name="donateId" type="java.lang.Integer">
+            <column name="d_ID" />
+            <generator class="identity"/>
+        </id>
+   
+        <property name="userId" type="java.lang.Integer">
+            <column name="u_ID" />
+        </property>
+        
+        <property name="bookId" type="java.lang.Integer">
+            <column name="b_ID" />
+        </property>
+        
+        <property name="status" type="java.lang.Integer">
+            <column name="status" />
+        </property>
+        
+        <property name="donateTime" type="java.util.Date">
+            <column name="donate_time" />
+        </property>
+ 
+    </class>
+    
+</hibernate-mapping>

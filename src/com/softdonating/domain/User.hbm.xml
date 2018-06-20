@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.softdonating.domain">
+
+    <class name="User" table="User">
+    
+        <id name="userId" type="java.lang.Integer">
+            <column name="u_ID" />
+            <generator class="identity"/>
+        </id>
+   
+        <property name="codeId" type="java.lang.String">
+            <column name="code" />
+        </property>
+        
+        <property name="name" type="java.lang.String">
+            <column name="name" />
+        </property>
+        
+        <property name="photo" type="java.sql.Blob">
+            <column name="photo" />
+        </property>
+        
+        <property name="faculty" type="java.lang.String">
+            <column name="faculty" />
+        </property>
+        
+        <property name="grade" type="java.lang.String">
+            <column name="grade" />
+        </property>
+        
+        <property name="phoneNumber" type="java.lang.String">
+            <column name="phone_number" />
+        </property>
+        
+        <set name="books" table="user_book" lazy="false">
+        	<!-- 当前类在中间表中的外键 -->
+            <key column="userId" />
+            <many-to-many class="com.softdonating.domain.Books" column="bookId"/>
+        </set>
+    </class>
+    
+</hibernate-mapping>

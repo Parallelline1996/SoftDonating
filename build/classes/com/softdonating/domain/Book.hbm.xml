@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.softdonating.domain">
+
+    <class name="Books" table="Book">
+    
+        <id name="bookId" type="java.lang.Integer">
+            <column name="b_ID" />
+			<generator class="identity"/>
+        </id>
+
+   		<property name="isbn" type="java.lang.String">
+            <column name="isbn" />
+        </property>
+   
+        <property name="name" type="java.lang.String">
+            <column name="name" />
+        </property>
+        
+        <property name="publisher" type="java.lang.String">
+            <column name="publisher" />
+        </property>
+        
+        <property name="content" type="java.lang.String">
+            <column name="content" />
+        </property>
+        
+        <property name="author" type="java.lang.String">
+            <column name="author" />
+        </property>
+        
+        <property name="photo" type="java.sql.Blob">
+            <column name="photo" />
+        </property>
+        
+        <property name="number" type="java.lang.Integer">
+            <column name="number" />
+        </property>
+        
+        <property name="followNumber" type="java.lang.Integer">
+            <column name="follow_number" />
+        </property>
+        
+        <set name="users" table="user_book" inverse="true" lazy="false">
+   			<key column="bookId"/>
+   			<many-to-many class="com.softdonating.domain.User" column="userId"/>
+   		</set>
+    </class>
+    
+</hibernate-mapping>
