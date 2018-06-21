@@ -5,4 +5,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class NormalController {
 
+	// 返回热门推荐的图书
+	
+	
+	// 补全
 }

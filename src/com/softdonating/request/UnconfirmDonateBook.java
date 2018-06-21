@@ -1,9 +1,10 @@
-package com.softdonating.domain;
+package com.softdonating.request;
 
 import java.sql.Blob;
-import java.util.Set;
+import java.util.Date;
 
-public class Books {
+public class UnconfirmDonateBook {
+
 	private Integer bookId;
     private String isbn;
     private String name;
@@ -11,14 +12,13 @@ public class Books {
     private String publisher;
     private String content;
     private Blob photo;
-    private Integer number;
-    private Integer followNumber;
-    private Set<User> users;
+    private Integer donateId;
+    private Date donateTime;
 	
-    public Books() {
+    public UnconfirmDonateBook() {
 	}
-    public Books(Integer bookId, String isbn, String name, String author, String publisher, String content, Blob photo,
-			Integer number, Integer followNumber, Set<User> users) {
+    public UnconfirmDonateBook(Integer bookId, String isbn, String name, String author, String publisher,
+			String content, Blob photo, Integer donateId, Date donateTime) {
 		super();
 		this.bookId = bookId;
 		this.isbn = isbn;
@@ -27,15 +27,14 @@ public class Books {
 		this.publisher = publisher;
 		this.content = content;
 		this.photo = photo;
-		this.number = number;
-		this.followNumber = followNumber;
-		this.users = users;
+		this.donateId = donateId;
+		this.donateTime = donateTime;
 	}
 	@Override
 	public String toString() {
-		return "Books [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author + ", publisher="
-				+ publisher + ", content=" + content + ", photo=" + photo + ", number=" + number + ", followNumber="
-				+ followNumber + ", users=" + users + "]";
+		return "UnconfirmDonateBook [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author
+				+ ", publisher=" + publisher + ", content=" + content + ", photo=" + photo + ", donateId=" + donateId
+				+ ", donateTime=" + donateTime + "]";
 	}
 	@Override
 	public int hashCode() {
@@ -44,10 +43,10 @@ public class Books {
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
 		result = prime * result + ((bookId == null) ? 0 : bookId.hashCode());
 		result = prime * result + ((content == null) ? 0 : content.hashCode());
-		result = prime * result + ((followNumber == null) ? 0 : followNumber.hashCode());
+		result = prime * result + ((donateId == null) ? 0 : donateId.hashCode());
+		result = prime * result + ((donateTime == null) ? 0 : donateTime.hashCode());
 		result = prime * result + ((isbn == null) ? 0 : isbn.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((number == null) ? 0 : number.hashCode());
 		result = prime * result + ((photo == null) ? 0 : photo.hashCode());
 		result = prime * result + ((publisher == null) ? 0 : publisher.hashCode());
 		return result;
@@ -60,16 +59,51 @@ public class Books {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Books other = (Books) obj;
+		UnconfirmDonateBook other = (UnconfirmDonateBook) obj;
+		if (author == null) {
+			if (other.author != null)
+				return false;
+		} else if (!author.equals(other.author))
+			return false;
 		if (bookId == null) {
 			if (other.bookId != null)
 				return false;
 		} else if (!bookId.equals(other.bookId))
 			return false;
+		if (content == null) {
+			if (other.content != null)
+				return false;
+		} else if (!content.equals(other.content))
+			return false;
+		if (donateId == null) {
+			if (other.donateId != null)
+				return false;
+		} else if (!donateId.equals(other.donateId))
+			return false;
+		if (donateTime == null) {
+			if (other.donateTime != null)
+				return false;
+		} else if (!donateTime.equals(other.donateTime))
+			return false;
 		if (isbn == null) {
 			if (other.isbn != null)
 				return false;
 		} else if (!isbn.equals(other.isbn))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (photo == null) {
+			if (other.photo != null)
+				return false;
+		} else if (!photo.equals(other.photo))
+			return false;
+		if (publisher == null) {
+			if (other.publisher != null)
+				return false;
+		} else if (!publisher.equals(other.publisher))
 			return false;
 		return true;
 	}
@@ -115,25 +149,20 @@ public class Books {
 	public void setPhoto(Blob photo) {
 		this.photo = photo;
 	}
-	public Integer getNumber() {
-		return number;
+	public Integer getDonateId() {
+		return donateId;
 	}
-	public void setNumber(Integer number) {
-		this.number = number;
+	public void setDonateId(Integer donateId) {
+		this.donateId = donateId;
 	}
-	public Integer getFollowNumber() {
-		return followNumber;
+	public Date getDonateTime() {
+		return donateTime;
 	}
-	public void setFollowNumber(Integer followNumber) {
-		this.followNumber = followNumber;
-	}
-	public Set<User> getUsers() {
-		return users;
-	}
-	public void setUsers(Set<User> users) {
-		this.users = users;
+	public void setDonateTime(Date donateTime) {
+		this.donateTime = donateTime;
 	}
 	
-   
+    
+    
     
 }
