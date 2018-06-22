@@ -15,4 +15,6 @@ public interface BookDao {
 	List<Books> getBookListByPage(Integer page);
 	
 	Integer numberOfKindOfBook();
+	
+	boolean updateBook(Books books);
 }

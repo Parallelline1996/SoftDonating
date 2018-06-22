@@ -4,7 +4,8 @@ import java.util.List;
 
 import com.softdonating.domain.Books;
 import com.softdonating.request.BookWithNumber;
-import com.softdonating.request.UnconfirmDonateBook;
+import com.softdonating.response.BookRecord;
+import com.softdonating.response.UnconfirmDonateBook;
 
 public interface BookService {
 
@@ -14,7 +15,7 @@ public interface BookService {
 	
 	List<UnconfirmDonateBook> getUnconfirmedDonate(Integer userId);
 	
-	Integer confirmDonate(List<Integer> data);
+	Integer confirmDonate(List<BookWithNumber> data, Integer userId);
 	
 	Integer createWithList(Integer userId, String isbn);
 	
@@ -27,4 +28,14 @@ public interface BookService {
 	Integer numberOfKindOfBook();
 	
 	Integer takeBook(Integer userId, String isbn);
+	
+	Integer numberOfDonates(Integer userId);
+	
+	Integer numberOfTakes(Integer userId);
+	
+	List<BookRecord> donateList(Integer userId);
+	
+	List<BookRecord> takeList(Integer userId);
+	
+	Integer deleteUnconfirmedDonating(Integer donateId);
 }

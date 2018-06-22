@@ -59,6 +59,9 @@ public class UserDaoImpl extends HibernateUtil implements UserDao {
 	public boolean addWishList(Integer userId, Books books) {
 		User user = findUserById(userId);
 		Set<Books> set = user.getBooks();
+		if (set.contains(books)) {
+			return false;
+		}
 		set.add(books);
 		user.setBooks(set);
 		return update(user);
@@ -69,6 +72,9 @@ public class UserDaoImpl extends HibernateUtil implements UserDao {
 		// 删除是多对多关系集里面的一条关系
 		User user = findUserById(userId);
 		Set<Books> setBook = user.getBooks();
+		if (!setBook.contains(books)) {
+			return false;
+		}
 		setBook.remove(books);
 		user.setBooks(setBook);
 		return update(user);

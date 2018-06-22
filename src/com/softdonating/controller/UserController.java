@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.softdonating.domain.Books;
 import com.softdonating.domain.User;
 import com.softdonating.request.BookWithNumber;
-import com.softdonating.request.UnconfirmDonateBook;
+import com.softdonating.response.BookRecord;
+import com.softdonating.response.UnconfirmDonateBook;
 import com.softdonating.service.AccountService;
 import com.softdonating.service.BookService;
 import com.softdonating.service.NormalService;
@@ -24,14 +25,21 @@ import com.softdonating.service.NormalService;
 @Controller
 public class UserController {
 
-	// 查看图书list
+	/**
+	 * 分页查看图书信息
+	 * @param page 页码
+	 * @return 图书列表
+	 */
 	@ResponseBody
 	@RequestMapping("/bookList/{page}")
 	public List<Books> getBookList(@PathVariable("page") Integer page){
 		return bookService.getBookByPage(page);
 	}
 	
-	// 查看总的图书种类
+	/**
+	 * 查看图书现有种类
+	 * @return 返回数目
+	 */
 	@ResponseBody
 	@RequestMapping("/numberOfBook")
 	public int getNumberOfBook() {
@@ -44,19 +52,27 @@ public class UserController {
 	public int login() {
 		HttpSession session = request.getSession();
 		session.setAttribute("userId", 1);
+		// 区分第一次登陆
 		return 200;
 	}
 	
-	// 通过输入isbn获取图书的具体信息
+	/**
+	 * 获取图书具体信息
+	 * @param isbn 图书的ISBN
+	 * @return 图书的具体信息
+	 */
 	@ResponseBody
 	@RequestMapping("/getBookData")
-	public Books getBookData(@RequestBody Books books) {
-		String isbn = books.getIsbn();
+	public Books getBookData(@RequestBody String isbn) {
 		return bookService.findBookByIsbn(isbn);
 	}
 	
 	
-	// 捐赠
+	/**
+	 * 捐赠图书，加入待确定清单
+	 * @param data 捐赠的信息，图书的ISBN
+	 * @return 整数类型：(404 -> 未登陆)(200 -> 成功)(-1 -> 异常)
+	 */
 	@ResponseBody
 	@RequestMapping("/donate")
 	public int Donate(@RequestBody BookWithNumber data) {
@@ -65,7 +81,10 @@ public class UserController {
 		return bookService.donateBook(userId, data);
 	}
 	
-	// 获取未确定列表
+	/**
+	 * 获取未确定列表，自动清除超过3天未确定的捐赠记录
+	 * @return List，返回未确定的图书列表
+	 */
 	@ResponseBody
 	@RequestMapping("/unconfirmedDonatingList")
 	public List<UnconfirmDonateBook> unconfirmedDonatingList() {
@@ -74,14 +93,34 @@ public class UserController {
 		return bookService.getUnconfirmedDonate(userId);
 	}
 	
-	// 确定捐赠
+	/**
+	 * 删除未确定捐赠
+	 * @return 整数类型(200 -> 成功)(-1 -> 异常)
+	 */
 	@ResponseBody
-	@RequestMapping("/confirmDonating")
-	public int donateBook(@RequestBody List<Integer> data) {
-		return bookService.confirmDonate(data);
+	@RequestMapping("/deleteUnconfirmedDonatingList")
+	public int deleteUnconfirmedDonatingList(@RequestBody Integer donateId) {
+		return bookService.deleteUnconfirmedDonating(donateId);
 	}
 	
-	// 加入心愿单，通过isbn
+	/**
+	 * 确定捐赠
+	 * @param data
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/confirmDonating")
+	public int donateBook(@RequestBody List<BookWithNumber> data) {
+		HttpSession session = request.getSession();
+		Integer userId = (Integer)session.getAttribute("userId");
+		return bookService.confirmDonate(data, userId);
+	}
+	
+	/**
+	 * 加入心愿单
+	 * @param isbn 图书的ISBN
+	 * @return 整数类型：(404 -> 未登陆)(200 -> 成功)(-1 -> 异常)
+	 */
 	@ResponseBody
 	@RequestMapping("/createWishList")
 	public int createWishList(@RequestBody String isbn) {
@@ -90,7 +129,11 @@ public class UserController {
 		return bookService.createWithList(userId, isbn);
 	}
 	
-	// 删除心愿单
+	/**
+	 * 删除心愿单
+	 * @param isbn 图书的ISBN
+	 * @return 整数类型：(404 -> 未登陆)(200 -> 成功)(-1 -> 异常)
+	 */
 	@ResponseBody
 	@RequestMapping("/deleteWishList")
 	public int deleteWishList(@RequestBody String isbn) {
@@ -99,7 +142,10 @@ public class UserController {
 		return bookService.deleteWithList(userId, isbn);
 	}
 	
-	// 获取心愿单
+	/**
+	 * 获取心愿单
+	 * @return 心愿单List
+	 */
 	@ResponseBody
 	@RequestMapping("/getWishList")
 	public List<Books> getWishList() {
@@ -108,7 +154,11 @@ public class UserController {
 		return bookService.getWishList(userId);
 	}
 	
-	// 确认拿书
+	/**
+	 * 确认拿书
+	 * @param isbn 图书ISBN
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping("/takeBook")
 	public int takeBook(@RequestBody String isbn) {
@@ -117,20 +167,65 @@ public class UserController {
 		return bookService.takeBook(userId, isbn);
 	}
 	
-	// 查看用户个人信息
+	/**
+	 * 查看用户信息
+	 * @return 用户个人信息
+	 */
 	@ResponseBody
 	@RequestMapping("/getUserData")
 	public User getUserData(@RequestBody User user) {
-		Integer userId = user.getUserId();
-		if (userId != null) {
-			return accountService.findUserById(userId);
-		}
-		return accountService.findUserByCode(user.getCode());
+		HttpSession session = request.getSession();
+		Integer userId = (Integer)session.getAttribute("userId");
+		return accountService.findUserById(userId);
 	}
 	
-	// 查看捐书记录
+	/**
+	 * 查看捐书数目
+	 * @return 整数代表数目
+	 */
+	@ResponseBody
+	@RequestMapping("/numberOfDonate")
+	public int numberOfDonate() {
+		HttpSession session = request.getSession();
+		Integer userId = (Integer)session.getAttribute("userId");
+		return bookService.numberOfDonates(userId);
+	}
 	
-	// 查看拿书记录
+	/**
+	 * 查看拿书数目
+	 * @return 整数代表数目
+	 */
+	@ResponseBody
+	@RequestMapping("/numberOfTake")
+	public int numberOfTake() {
+		HttpSession session = request.getSession();
+		Integer userId = (Integer)session.getAttribute("userId");
+		return bookService.numberOfTakes(userId);
+	}
+	
+	/**
+	 *  查看捐书记录
+	 * @return 捐书记录
+	 */
+	@ResponseBody
+	@RequestMapping("/getDonateRecord")
+	public List<BookRecord> getDonateRecord() {
+		HttpSession session = request.getSession();
+		Integer userId = (Integer)session.getAttribute("userId");
+		return bookService.donateList(userId);
+	}
+	
+	/**
+	 *  查看拿书记录
+	 * @return 拿书记录
+	 */
+	@ResponseBody
+	@RequestMapping("/getTakeRecord")
+	public List<BookRecord> getTakeRecord() {
+		HttpSession session = request.getSession();
+		Integer userId = (Integer)session.getAttribute("userId");
+		return bookService.takeList(userId);
+	}
 	
 	@Autowired
 	@Qualifier("bookServiceImpl")

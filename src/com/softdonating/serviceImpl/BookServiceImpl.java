@@ -18,7 +18,8 @@ import com.softdonating.domain.Donate;
 import com.softdonating.domain.Take;
 import com.softdonating.domain.User;
 import com.softdonating.request.BookWithNumber;
-import com.softdonating.request.UnconfirmDonateBook;
+import com.softdonating.response.BookRecord;
+import com.softdonating.response.UnconfirmDonateBook;
 import com.softdonating.service.BookService;
 
 @Service
@@ -49,6 +50,9 @@ public class BookServiceImpl implements BookService {
 			return 404;
 		}
 		int number = data.getNumber();
+		// 这里暂时改为不维护数目
+		number = 1;
+		// 对同一种书的多本书，转成多条记录进行保存
 		for (int i = 0; i < number; i++) {
 			Date donateTime = new Date();
 			Donate donate = new Donate(null, userId, data.getBookId(), -1, donateTime);
@@ -59,22 +63,6 @@ public class BookServiceImpl implements BookService {
 		return 200;
 	}
 	
-	@Autowired
-	@Qualifier("bookDaoImpl")
-	private BookDao bookDao;
-	
-	@Autowired
-	@Qualifier("donateDaoImpl")
-	private DonateDao donateDao;
-	
-	@Autowired
-	@Qualifier("userDaoImpl")
-	private UserDao userDao;
-	
-	@Autowired
-	@Qualifier("takeDaoImpl")
-	private TakeDao takeDao;
-
 	@Override
 	public List<UnconfirmDonateBook> getUnconfirmedDonate(Integer userId) {
 		if (userId == null) {
@@ -83,23 +71,34 @@ public class BookServiceImpl implements BookService {
 		List<Donate> donates = donateDao.getUnconfirmedList(userId);
 		List<UnconfirmDonateBook> books = new ArrayList<>();
 		for (Donate donate : donates) {
-			Books temp = bookDao.findBookById(donate.getBookId());
-			UnconfirmDonateBook book = new UnconfirmDonateBook(temp.getBookId(), temp.getIsbn(), 
-					temp.getName(), temp.getAuthor(), temp.getPublisher(), temp.getContent(), 
-					temp.getPhoto(), donate.getDonateId(), donate.getDonateTime());
-			books.add(book);
+			Date date = new Date(new Date().getTime() - 3 * 86400000);
+			// 如果捐赠时间超过3天，被自动清除
+			if (date.after(donate.getDonateTime())) {
+				donateDao.deleteDonate(donate.getDonateId());
+				continue;
+			} else {
+				Books temp = bookDao.findBookById(donate.getBookId());
+				UnconfirmDonateBook book = new UnconfirmDonateBook(temp.getBookId(), temp.getIsbn(), 
+						temp.getName(), temp.getAuthor(), temp.getPublisher(), temp.getContent(), 
+						temp.getPhoto(), donate.getDonateId(), donate.getDonateTime());
+				books.add(book);
+			}
 		}
 		return books;
 	}
 
 	@Override
-	public Integer confirmDonate(List<Integer> data) {
-		if (data == null) {
+	public Integer confirmDonate(List<BookWithNumber> data, Integer userId) {
+		if (data == null || userId == null) {
 			// 没有可操作的数据
 			return 404;
 		}
-		for (Integer integer : data) {
-			if (!donateDao.confirmDonate(integer)) {
+		for (BookWithNumber bookWithNumber : data) {
+			Books books = bookDao.findBookByIsbn(bookWithNumber.getIsbn());
+			// 找到donate
+			Donate donate = donateDao.findDonate(userId, books.getBookId());
+			// 将原来记录的状态进行修改
+			if (!donateDao.confirmDonate(donate.getDonateId(), bookWithNumber.getNumber())) {
 				return -1;
 			}
 		}
@@ -113,7 +112,13 @@ public class BookServiceImpl implements BookService {
 		}
 		Books books = bookDao.findBookByIsbn(isbn);
 		if (userDao.addWishList(userId, books)) {
-			return 200;
+			books.setFollowNumber(books.getFollowNumber() + 1);
+			if(bookDao.updateBook(books)) {
+				return 200;				
+			} else {
+				userDao.deleteWishList(userId, books);
+				return -1;
+			}
 		} else {
 			return -1;
 		}
@@ -126,7 +131,13 @@ public class BookServiceImpl implements BookService {
 		}
 		Books books = bookDao.findBookByIsbn(isbn);
 		if (userDao.deleteWishList(userId, books)) {
-			return 200;
+			books.setFollowNumber(books.getFollowNumber() - 1);
+			if (bookDao.updateBook(books)) {
+				return 200;				
+			} else {
+				userDao.deleteWishList(userId, books);
+				return -1;
+			}
 		} else {
 			return -1;
 		}
@@ -182,4 +193,88 @@ public class BookServiceImpl implements BookService {
 		}
 		return -2;
 	}
+
+	@Override
+	public Integer numberOfDonates(Integer userId) {
+		if (userId == null) {
+			return -1;
+		}
+		return takeDao.numberOfDonate(userId);
+	}
+
+	@Override
+	public Integer numberOfTakes(Integer userId) {
+		if (userId == null) {
+			return -1;
+		}
+		return takeDao.numberOfTake(userId);
+	}
+
+	@Override
+	public List<BookRecord> donateList(Integer userId) {
+		if (userId == null) {
+			return null;
+		}
+		List<BookRecord> donateList = new ArrayList<>();
+		List<Take> takes = takeDao.donateList(userId);
+		List<Donate> donates = donateDao.donateList(userId);
+		for (Donate donate : donates) {
+			Books books = bookDao.findBookById(donate.getBookId());
+			donateList.add(new BookRecord(books.getBookId(), books.getIsbn(), 
+					books.getName(), books.getAuthor(), books.getPublisher(), 
+					books.getPhoto(), donate.getDonateTime()));
+		}
+		for (Take take : takes) {
+			Books books = bookDao.findBookById(take.getBookId());
+			donateList.add(new BookRecord(books.getBookId(), books.getIsbn(), 
+					books.getName(), books.getAuthor(), books.getPublisher(), 
+					books.getPhoto(), take.getDonateTime()));
+		}
+		return donateList;
+	}
+
+	@Override
+	public List<BookRecord> takeList(Integer userId) {
+		if (userId == null) {
+			return null;
+		}
+		List<BookRecord> takeList = new ArrayList<>();
+		List<Take> takes = takeDao.takeList(userId);
+		for (Take take : takes) {
+			Books books = bookDao.findBookById(take.getBookId());
+			takeList.add(new BookRecord(books.getBookId(), books.getIsbn(), 
+					books.getName(), books.getAuthor(), books.getPublisher(), 
+					books.getPhoto(), take.getTakeTime()));
+		}
+		return takeList;
+	}
+
+	@Override
+	public Integer deleteUnconfirmedDonating(Integer donateId) {
+		Donate donate = donateDao.findDonateById(donateId);
+		if (donate.getStatus() != -1) {
+			return -1;
+		} 
+		if (donateDao.deleteDonate(donateId)){
+			return 200;
+		} else {
+			return -1;
+		}
+	}
+	
+	@Autowired
+	@Qualifier("bookDaoImpl")
+	private BookDao bookDao;
+	
+	@Autowired
+	@Qualifier("donateDaoImpl")
+	private DonateDao donateDao;
+	
+	@Autowired
+	@Qualifier("userDaoImpl")
+	private UserDao userDao;
+	
+	@Autowired
+	@Qualifier("takeDaoImpl")
+	private TakeDao takeDao;
 }

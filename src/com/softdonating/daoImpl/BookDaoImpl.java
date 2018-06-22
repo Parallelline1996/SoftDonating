@@ -86,4 +86,12 @@ public class BookDaoImpl extends HibernateUtil implements BookDao {
 		return number;
 	}
 
+	@Override
+	public boolean updateBook(Books books) {
+		if (books.getFollowNumber() < 0 || books.getNumber() < 0) {
+			return false;
+		}
+		return update(books);
+	}
+
 }

@@ -47,6 +47,7 @@ public class HibernateUtil {
 	//更新一个新的Object
 	public boolean update(Object obj) {
 		Session session = sessionFactory.openSession();
+		session.clear();
 		Transaction tx = session.beginTransaction();
 		boolean status = false;
 		try {
@@ -150,8 +151,23 @@ public class HibernateUtil {
 		return (List<Object>) query.list();
 	}
 	
-	//获取数目
+	// 获取数目
 	public Object getSize(String hql){
 		return sessionFactory.openSession().createQuery(hql).uniqueResult();
 	}
+	
+	// 简单的数目查询
+	public Integer numberOfResult(String hql, Integer userId) {
+		Session session = sessionFactory.openSession();
+		int number = 0;
+		try {
+			number = session.createQuery(hql).setParameter(0, userId).list().size();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return number;
+	}
+	
 }
