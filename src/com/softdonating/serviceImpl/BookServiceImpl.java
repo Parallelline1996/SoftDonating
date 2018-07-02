@@ -1,6 +1,11 @@
 package com.softdonating.serviceImpl;
 
- import java.util.ArrayList;
+ import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -23,12 +28,14 @@ import com.softdonating.response.UnconfirmDonateBook;
 import com.softdonating.service.BookService;
 import com.softdonating.util.Message;
 
+import net.sf.json.JSONObject;
+
 @Service
 @Qualifier("bookServiceImpl")
 public class BookServiceImpl implements BookService {
 
 	@Override
-	public Books findBookByIsbn(String isbn) {
+	public Books findBookByIsbn(String isbn) throws Exception {
 		// 检查输入是否合法
 		if (isbn == null) {
 			return null;
@@ -39,11 +46,62 @@ public class BookServiceImpl implements BookService {
 			books.setUsers(null);
 			return books;
 		} else {
-			
-			// 这里待完成，
-			return null;
+			// 如果书籍不存在，调用豆瓣开发工具找:
+			String temp = "https://api.douban.com/v2/book/isbn/";
+			temp = temp + isbn;
+			BufferedReader bReader = null;
+			StringBuilder stringBuilder = new StringBuilder(); 
+			HttpURLConnection connection = null;
+			try {
+				// 创建URL
+				URL url = new URL(temp);
+				// 创建链接
+				connection = (HttpURLConnection)url.openConnection();
+				if (connection == null){
+					return null;
+				}
+				// 进行链接
+				connection.connect();
+				// 打开流
+				bReader = new BufferedReader(
+						new InputStreamReader(connection.getInputStream(), "UTF-8"));
+				String line = null;
+				while ((line = bReader.readLine()) != null) {
+					stringBuilder.append(line);
+				}
+				// 关闭流
+				bReader.close();
+				JSONObject jsonObject = JSONObject.fromObject(stringBuilder.toString());
+				String name = jsonObject.get("subtitle").toString();
+				String author = jsonObject.get("author").toString();
+				String publisher = jsonObject.get("publisher").toString();
+				String content = jsonObject.get("summary").toString();
+				content = (String) content.subSequence(0, 499);
+				JSONObject array = JSONObject.fromObject(jsonObject.get("images").toString());
+				// 这里差一个默认图片
+				String photo = array.get("small").toString();
+				// 照片这里出现问题
+				System.out.println(name);
+				System.out.println(author);
+				System.out.println(publisher);
+				System.out.println(content);
+				System.out.println(photo);
+				books = new Books(0, isbn, name, author, publisher, content, null, 0, 0, null);
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} finally {
+				// 关闭链接
+				connection.disconnect();
+			}
 		}
+		if (bookDao.insertBook(books)){
+			Books temp = bookDao.findBookByIsbn(isbn);
+			return temp;
+		}
+		return null;
 	}
+
+	
 
 	@Override
 	public Integer donateBook(Integer userId, BookWithNumber data) {

@@ -94,4 +94,9 @@ public class BookDaoImpl extends HibernateUtil implements BookDao {
 		return update(books);
 	}
 
+	@Override
+	public boolean insertBook(Books books) {
+		return save(books);
+	}
+
 }

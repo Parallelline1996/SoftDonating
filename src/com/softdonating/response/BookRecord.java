@@ -1,6 +1,5 @@
 package com.softdonating.response;
 
-import java.sql.Blob;
 import java.util.Date;
 
 public class BookRecord {
@@ -10,12 +9,12 @@ public class BookRecord {
     private String name;
     private String author;
     private String publisher;
-    private Blob photo;
+    private String photo;
     private Date time;  // 对于捐书记录，就是捐书时间，对于拿书记录，就是拿书时间
 	
     public BookRecord() {
 	}
-    public BookRecord(Integer bookId, String isbn, String name, String author, String publisher, Blob photo,
+    public BookRecord(Integer bookId, String isbn, String name, String author, String publisher, String photo,
 			Date time) {
 		super();
 		this.bookId = bookId;
@@ -25,11 +24,6 @@ public class BookRecord {
 		this.publisher = publisher;
 		this.photo = photo;
 		this.time = time;
-	}
-	@Override
-	public String toString() {
-		return "BookRecord [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author
-				+ ", publisher=" + publisher + ", photo=" + photo + ", time=" + time + "]";
 	}
 	@Override
 	public int hashCode() {
@@ -90,6 +84,11 @@ public class BookRecord {
 			return false;
 		return true;
 	}
+	@Override
+	public String toString() {
+		return "BookRecord [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author
+				+ ", publisher=" + publisher + ", photo=" + photo + ", time=" + time + "]";
+	}
 	public Integer getBookId() {
 		return bookId;
 	}
@@ -120,10 +119,10 @@ public class BookRecord {
 	public void setPublisher(String publisher) {
 		this.publisher = publisher;
 	}
-	public Blob getPhoto() {
+	public String getPhoto() {
 		return photo;
 	}
-	public void setPhoto(Blob photo) {
+	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
 	public Date getTime() {

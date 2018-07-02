@@ -1,6 +1,5 @@
 package com.softdonating.response;
 
-import java.sql.Blob;
 import java.util.Date;
 
 public class UnconfirmDonateBook {
@@ -11,14 +10,14 @@ public class UnconfirmDonateBook {
     private String author;
     private String publisher;
     private String content;
-    private Blob photo;
+    private String photo;
     private Integer donateId;
     private Date donateTime;
 	
     public UnconfirmDonateBook() {
 	}
     public UnconfirmDonateBook(Integer bookId, String isbn, String name, String author, String publisher,
-			String content, Blob photo, Integer donateId, Date donateTime) {
+			String content, String photo, Integer donateId, Date donateTime) {
 		super();
 		this.bookId = bookId;
 		this.isbn = isbn;
@@ -29,12 +28,6 @@ public class UnconfirmDonateBook {
 		this.photo = photo;
 		this.donateId = donateId;
 		this.donateTime = donateTime;
-	}
-	@Override
-	public String toString() {
-		return "UnconfirmDonateBook [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author
-				+ ", publisher=" + publisher + ", content=" + content + ", photo=" + photo + ", donateId=" + donateId
-				+ ", donateTime=" + donateTime + "]";
 	}
 	@Override
 	public int hashCode() {
@@ -107,6 +100,12 @@ public class UnconfirmDonateBook {
 			return false;
 		return true;
 	}
+	@Override
+	public String toString() {
+		return "UnconfirmDonateBook [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author
+				+ ", publisher=" + publisher + ", content=" + content + ", photo=" + photo + ", donateId=" + donateId
+				+ ", donateTime=" + donateTime + "]";
+	}
 	public Integer getBookId() {
 		return bookId;
 	}
@@ -143,10 +142,10 @@ public class UnconfirmDonateBook {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public Blob getPhoto() {
+	public String getPhoto() {
 		return photo;
 	}
-	public void setPhoto(Blob photo) {
+	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
 	public Integer getDonateId() {
@@ -162,7 +161,7 @@ public class UnconfirmDonateBook {
 		this.donateTime = donateTime;
 	}
 	
-    
+   
     
     
 }

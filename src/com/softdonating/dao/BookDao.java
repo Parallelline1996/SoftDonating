@@ -17,4 +17,6 @@ public interface BookDao {
 	Integer numberOfKindOfBook();
 	
 	boolean updateBook(Books books);
+	
+	boolean insertBook(Books books);
 }

@@ -59,11 +59,12 @@ public class UserController {
 	/**
 	 * 获取图书具体信息
 	 * @param isbn 图书的ISBN
-	 * @return 图书的具体信息
+	 * @return 图书的具体信息，如果该图书未能被找到，则返回Null
+	 * @throws Exception 
 	 */
 	@ResponseBody
 	@RequestMapping("/getBookData")
-	public Books getBookData(@RequestBody String isbn) {
+	public Books getBookData(@RequestBody String isbn) throws Exception {
 		return bookService.findBookByIsbn(isbn);
 	}
 	

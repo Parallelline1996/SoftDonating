@@ -1,6 +1,5 @@
 package com.softdonating.domain;
 
-import java.sql.Blob;
 import java.util.Set;
 
 public class Books {
@@ -10,15 +9,15 @@ public class Books {
     private String author;
     private String publisher;
     private String content;
-    private Blob photo;
+    private String photo;
     private Integer number;
     private Integer followNumber;
     private Set<User> users;
 	
     public Books() {
 	}
-    public Books(Integer bookId, String isbn, String name, String author, String publisher, String content, Blob photo,
-			Integer number, Integer followNumber, Set<User> users) {
+    public Books(Integer bookId, String isbn, String name, String author, String publisher, String content,
+			String photo, Integer number, Integer followNumber, Set<User> users) {
 		super();
 		this.bookId = bookId;
 		this.isbn = isbn;
@@ -30,12 +29,6 @@ public class Books {
 		this.number = number;
 		this.followNumber = followNumber;
 		this.users = users;
-	}
-	@Override
-	public String toString() {
-		return "Books [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author + ", publisher="
-				+ publisher + ", content=" + content + ", photo=" + photo + ", number=" + number + ", followNumber="
-				+ followNumber + ", users=" + users + "]";
 	}
 	@Override
 	public int hashCode() {
@@ -73,6 +66,12 @@ public class Books {
 			return false;
 		return true;
 	}
+	@Override
+	public String toString() {
+		return "Books [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author + ", publisher="
+				+ publisher + ", content=" + content + ", photo=" + photo + ", number=" + number + ", followNumber="
+				+ followNumber + ", users=" + users + "]";
+	}
 	public Integer getBookId() {
 		return bookId;
 	}
@@ -109,10 +108,10 @@ public class Books {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public Blob getPhoto() {
+	public String getPhoto() {
 		return photo;
 	}
-	public void setPhoto(Blob photo) {
+	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
 	public Integer getNumber() {
@@ -133,6 +132,8 @@ public class Books {
 	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
+	
+    
 	
    
     

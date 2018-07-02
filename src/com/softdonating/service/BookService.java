@@ -9,7 +9,7 @@ import com.softdonating.response.UnconfirmDonateBook;
 
 public interface BookService {
 
-	Books findBookByIsbn(String isbn);
+	Books findBookByIsbn(String isbn) throws Exception;
 	
 	Integer donateBook(Integer userId, BookWithNumber data);
 	
