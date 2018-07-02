@@ -21,6 +21,7 @@ import com.softdonating.request.BookWithNumber;
 import com.softdonating.response.BookRecord;
 import com.softdonating.response.UnconfirmDonateBook;
 import com.softdonating.service.BookService;
+import com.softdonating.util.Message;
 
 @Service
 @Qualifier("bookServiceImpl")
@@ -49,13 +50,13 @@ public class BookServiceImpl implements BookService {
 		if (userId == null) {
 			return 404;
 		}
-		int number = data.getNumber();
 		// 这里暂时改为不维护数目
-		number = 1;
+		int number = 1;//data.getNumber();
+		Books books = bookDao.findBookByIsbn(data.getIsbn());
 		// 对同一种书的多本书，转成多条记录进行保存
 		for (int i = 0; i < number; i++) {
 			Date donateTime = new Date();
-			Donate donate = new Donate(null, userId, data.getBookId(), -1, donateTime);
+			Donate donate = new Donate(null, userId, books.getBookId(), -1, donateTime);
 			if (donateDao.createDonate(donate) == false) {
 				return -1;
 			}
@@ -189,6 +190,9 @@ public class BookServiceImpl implements BookService {
 		Take take = new Take(0, userId, donate.getUserId(), 
 				donate.getBookId(), donate.getDonateTime(), takeTime);
 		if (takeDao.createTake(take, donate.getDonateId())) {
+			Books temp = bookDao.findBookById(donate.getBookId());
+			User tempUser = userDao.findUserById(donate.getUserId());
+			Message.sendMs(tempUser.getPhoneNumber(), temp.getName());
 			return 200;
 		}
 		return -2;

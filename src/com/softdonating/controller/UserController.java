@@ -173,7 +173,7 @@ public class UserController {
 	 */
 	@ResponseBody
 	@RequestMapping("/getUserData")
-	public User getUserData(@RequestBody User user) {
+	public User getUserData() {
 		HttpSession session = request.getSession();
 		Integer userId = (Integer)session.getAttribute("userId");
 		return accountService.findUserById(userId);
