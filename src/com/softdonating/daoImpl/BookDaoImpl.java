@@ -99,4 +99,24 @@ public class BookDaoImpl extends HibernateUtil implements BookDao {
 		return save(books);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Books> allBooks() {
+		String hql = "from Books";
+		Session session = sessionFactory.openSession();
+		List<Object> objects = null;
+		List<Books> books = new ArrayList<>();
+		try {
+			objects = (List<Object>)session.createQuery(hql).list();
+			for (Object object : objects) {
+				books.add((Books)object);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return books;
+	}
+
 }

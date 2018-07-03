@@ -19,7 +19,7 @@
             <column name="name" />
         </property>
         
-        <property name="photo" type="java.sql.Blob">
+        <property name="photo" type="java.lang.String">
             <column name="photo" />
         </property>
         

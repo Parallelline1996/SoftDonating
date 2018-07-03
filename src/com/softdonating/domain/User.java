@@ -1,22 +1,21 @@
 package com.softdonating.domain;
 
-import java.sql.Blob;
 import java.util.Set;
 
 public class User {
 	private Integer userId;
     private String code;
     private String name;
-    private Blob photo;
+    private String photo;
     private String faculty;
     private String grade;
     private String phoneNumber;
     private Set<Books> books;
-    
+	
     public User() {
 	}
-    public User(Integer userId, String code, String name, Blob photo, String faculty, String grade, String phoneNumber,
-			Set<Books> books) {
+    public User(Integer userId, String code, String name, String photo, String faculty, String grade,
+			String phoneNumber, Set<Books> books) {
 		super();
 		this.userId = userId;
 		this.code = code;
@@ -59,6 +58,26 @@ public class User {
 				return false;
 		} else if (!code.equals(other.code))
 			return false;
+		if (faculty == null) {
+			if (other.faculty != null)
+				return false;
+		} else if (!faculty.equals(other.faculty))
+			return false;
+		if (grade == null) {
+			if (other.grade != null)
+				return false;
+		} else if (!grade.equals(other.grade))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (phoneNumber == null) {
+			if (other.phoneNumber != null)
+				return false;
+		} else if (!phoneNumber.equals(other.phoneNumber))
+			return false;
 		if (userId == null) {
 			if (other.userId != null)
 				return false;
@@ -84,10 +103,10 @@ public class User {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Blob getPhoto() {
+	public String getPhoto() {
 		return photo;
 	}
-	public void setPhoto(Blob photo) {
+	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
 	public String getFaculty() {
@@ -114,6 +133,8 @@ public class User {
 	public void setBooks(Set<Books> books) {
 		this.books = books;
 	}
+    
+   
 	
    
     

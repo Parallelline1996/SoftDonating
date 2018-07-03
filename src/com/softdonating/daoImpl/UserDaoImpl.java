@@ -19,7 +19,7 @@ public class UserDaoImpl extends HibernateUtil implements UserDao {
 
 	@Override
 	public boolean createUser(User user) {
-		return false;
+		return save(user);
 	}
 
 	@Override

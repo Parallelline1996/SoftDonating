@@ -1,7 +1,9 @@
 package com.softdonating.controller;
 
 import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -22,9 +24,10 @@ import com.softdonating.service.AccountService;
 import com.softdonating.service.BookService;
 import com.softdonating.service.NormalService;
 
+
 @Controller
 public class UserController {
-
+	
 	/**
 	 * 分页查看图书信息
 	 * @param page 页码
@@ -45,16 +48,41 @@ public class UserController {
 	public int getNumberOfBook() {
 		return bookService.numberOfKindOfBook();
 	}
-	
-	// 登陆、注册
+
+	/**
+	 * 登陆函数
+	 * @param code 
+	 * @return map类，其中code = 1时，代表为第一次登陆
+	 */
 	@ResponseBody
 	@RequestMapping("/login")
-	public int login() {
-		HttpSession session = request.getSession();
-		session.setAttribute("userId", 1);
-		// 区分第一次登陆
-		return 200;
+	public Map<String, String> login(@RequestBody String code) {
+		return accountService.login(code);
 	}
+
+	/**
+	 * 完善用户信息
+	 * @param user
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/userData")
+	public int UserData(@RequestBody User user){
+		Integer userId = null;
+		Cookie[] cookies = request.getCookies();
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equals("userId")){
+				userId = Integer.parseInt(cookie.getValue());
+				break;
+			}
+		}
+		// 请求头中没有userId
+		if (userId == null) {
+			return -1;
+		}
+		return 0;
+	}
+	
 	
 	/**
 	 * 获取图书具体信息

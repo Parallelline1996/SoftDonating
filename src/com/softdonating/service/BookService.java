@@ -38,4 +38,6 @@ public interface BookService {
 	List<BookRecord> takeList(Integer userId);
 	
 	Integer deleteUnconfirmedDonating(Integer donateId);
+	
+	List<Books> bestBooks();
 }

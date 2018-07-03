@@ -76,7 +76,9 @@ public class BookServiceImpl implements BookService {
 				String author = jsonObject.get("author").toString();
 				String publisher = jsonObject.get("publisher").toString();
 				String content = jsonObject.get("summary").toString();
-				content = (String) content.subSequence(0, 499);
+				if (content.length() >= 500) {
+					content = (String) content.subSequence(0, 499);					
+				}
 				JSONObject array = JSONObject.fromObject(jsonObject.get("images").toString());
 				// 这里差一个默认图片
 				String photo = array.get("small").toString();
@@ -86,7 +88,7 @@ public class BookServiceImpl implements BookService {
 				System.out.println(publisher);
 				System.out.println(content);
 				System.out.println(photo);
-				books = new Books(0, isbn, name, author, publisher, content, null, 0, 0, null);
+				books = new Books(0, isbn, name, author, publisher, content, photo, 0, 0, null);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} finally {
@@ -324,6 +326,41 @@ public class BookServiceImpl implements BookService {
 		}
 	}
 	
+	@Override
+	public List<Books> bestBooks() {
+		List<Books> books = new ArrayList<>();
+		books = bookDao.allBooks();		
+		int booksNumber = bookDao.numberOfKindOfBook();
+		// 如果图书数目不够10本，则推荐所有图书
+		if (booksNumber <= 10){
+			return books;
+		}
+		// 通过查看加入心愿单的人数，来进行排名
+		int[] temp = new int[booksNumber];
+		int[] sort = new int[booksNumber];
+		for (int i = 0; i < booksNumber; i++) {
+			temp[i] = books.get(i).getFollowNumber();
+			sort[i] = i;
+		}
+		for (int i = 0; i < booksNumber - 1; i++) {
+			for (int j = 1; j < booksNumber - i; j++) {
+				if (temp[j - 1] < temp[j]){
+					int a = temp[j - 1];
+					temp[j - 1] = temp[j];
+					temp[j] = a;
+					a = sort[i - 1];
+					sort[i - 1] = sort[i];
+					sort[i] = a;
+				}
+			}
+		}
+		List<Books> answer = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			answer.add(books.get(sort[i]));
+		}
+		return answer;
+	}
+	
 	@Autowired
 	@Qualifier("bookDaoImpl")
 	private BookDao bookDao;
@@ -339,4 +376,6 @@ public class BookServiceImpl implements BookService {
 	@Autowired
 	@Qualifier("takeDaoImpl")
 	private TakeDao takeDao;
+
+	
 }

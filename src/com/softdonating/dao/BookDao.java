@@ -19,4 +19,6 @@ public interface BookDao {
 	boolean updateBook(Books books);
 	
 	boolean insertBook(Books books);
+	
+	List<Books> allBooks();
 }
