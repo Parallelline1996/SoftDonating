@@ -25,6 +25,10 @@ public class AccountServiceImpl implements AccountService {
 	
 	private final String APPID = "wx4f6638e0c15aefbf";
 	private final String APPSECRET = "0b929c6afb6fd739c69ce9b58cf7653a";
+	
+	@Autowired
+	@Qualifier("userDaoImpl")
+	private UserDao userDao;
 
 	@Override
 	public User findUserById(Integer userId) {
@@ -47,10 +51,6 @@ public class AccountServiceImpl implements AccountService {
 		return user;
 	}
 	
-	@Autowired
-	@Qualifier("userDaoImpl")
-	private UserDao userDao;
-
 	@Override
 	public Map<String, String> login(String code) {
 		String address = "https://api.weixin.qq.com/sns/jscode2session?appid=" + APPID 
@@ -102,6 +102,25 @@ public class AccountServiceImpl implements AccountService {
 			map.put("code", "100");
 		}
 		return map;
+	}
+
+	@Override
+	public Integer updateUserData(User user, Integer userId) {
+		User userOld = userDao.findUserById(userId);
+		// 判断输入是否正确
+		if (userOld == null || user == null){
+			return 404;
+		}
+		// 对数值进行修改
+		userOld.setFaculty(user.getFaculty());
+		userOld.setGrade(user.getGrade());
+		userOld.setName(user.getName());
+		userOld.setPhoneNumber(user.getPhoneNumber());
+		userOld.setPhoto(user.getPhoto());
+		if (userDao.updateUser(userOld)){
+			return 200;
+		}
+		return -1;
 	}
 
 }

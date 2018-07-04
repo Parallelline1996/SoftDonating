@@ -16,4 +16,5 @@ public interface UserDao {
 	
 	boolean deleteWishList(Integer userId, Books books);
 	
+	boolean updateUser(User user);
 }

@@ -60,10 +60,30 @@ public class UserController {
 		return accountService.login(code);
 	}
 
+	
+	@ResponseBody
+	@RequestMapping("/loginTest")
+	public int loginTest(){
+		Integer userId = null;
+		Cookie[] cookies = request.getCookies();
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equals("userId")){
+				userId = Integer.parseInt(cookie.getValue());
+				break;
+			}
+		}
+		// 请求头中没有userId
+		if (userId == null) {
+			return -1;
+		}
+		return userId;
+	}
+	
+	
 	/**
 	 * 完善用户信息
 	 * @param user
-	 * @return
+	 * @return (404 -> 未登陆)(200 -> 成功)(-1 -> 异常)
 	 */
 	@ResponseBody
 	@RequestMapping("/userData")
@@ -80,7 +100,7 @@ public class UserController {
 		if (userId == null) {
 			return -1;
 		}
-		return 0;
+		return accountService.updateUserData(user, userId);
 	}
 	
 	

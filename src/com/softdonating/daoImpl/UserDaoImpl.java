@@ -80,4 +80,9 @@ public class UserDaoImpl extends HibernateUtil implements UserDao {
 		return update(user);
 	}
 
+	@Override
+	public boolean updateUser(User user) {
+		return update(user);
+	}
+
 }

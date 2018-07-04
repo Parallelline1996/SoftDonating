@@ -11,4 +11,6 @@ public interface AccountService {
 	User findUserByCode(String code);
 	
 	Map<String, String> login(String code);
+	
+	Integer updateUserData(User user, Integer userId);
 }
