@@ -2,28 +2,21 @@ package com.softdonating.request;
 
 public class BookWithNumber {
 
-	private Integer bookId;
-	private String isbn;
+	private Integer donateId;
 	private Integer number;
 	
 	public BookWithNumber() {
 	}
-	public BookWithNumber(Integer bookId, String isbn, Integer number) {
+	public BookWithNumber(Integer donateId, Integer number) {
 		super();
-		this.bookId = bookId;
-		this.isbn = isbn;
+		this.donateId = donateId;
 		this.number = number;
-	}
-	@Override
-	public String toString() {
-		return "BookWithNumber [bookId=" + bookId + ", isbn=" + isbn + ", number=" + number + "]";
 	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((bookId == null) ? 0 : bookId.hashCode());
-		result = prime * result + ((isbn == null) ? 0 : isbn.hashCode());
+		result = prime * result + ((donateId == null) ? 0 : donateId.hashCode());
 		result = prime * result + ((number == null) ? 0 : number.hashCode());
 		return result;
 	}
@@ -36,15 +29,10 @@ public class BookWithNumber {
 		if (getClass() != obj.getClass())
 			return false;
 		BookWithNumber other = (BookWithNumber) obj;
-		if (bookId == null) {
-			if (other.bookId != null)
+		if (donateId == null) {
+			if (other.donateId != null)
 				return false;
-		} else if (!bookId.equals(other.bookId))
-			return false;
-		if (isbn == null) {
-			if (other.isbn != null)
-				return false;
-		} else if (!isbn.equals(other.isbn))
+		} else if (!donateId.equals(other.donateId))
 			return false;
 		if (number == null) {
 			if (other.number != null)
@@ -53,17 +41,15 @@ public class BookWithNumber {
 			return false;
 		return true;
 	}
-	public Integer getBookId() {
-		return bookId;
+	@Override
+	public String toString() {
+		return "BookWithNumber [donateId=" + donateId + ", number=" + number + "]";
 	}
-	public void setBookId(Integer bookId) {
-		this.bookId = bookId;
+	public Integer getDonateId() {
+		return donateId;
 	}
-	public String getIsbn() {
-		return isbn;
-	}
-	public void setIsbn(String isbn) {
-		this.isbn = isbn;
+	public void setDonateId(Integer donateId) {
+		this.donateId = donateId;
 	}
 	public Integer getNumber() {
 		return number;
@@ -71,6 +57,7 @@ public class BookWithNumber {
 	public void setNumber(Integer number) {
 		this.number = number;
 	}
+	
 	
 	
 }

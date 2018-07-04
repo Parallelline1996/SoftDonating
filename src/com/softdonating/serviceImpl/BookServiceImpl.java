@@ -23,6 +23,8 @@ import com.softdonating.domain.Donate;
 import com.softdonating.domain.Take;
 import com.softdonating.domain.User;
 import com.softdonating.request.BookWithNumber;
+import com.softdonating.response.BookDetail;
+import com.softdonating.response.BookListData;
 import com.softdonating.response.BookRecord;
 import com.softdonating.response.UnconfirmDonateBook;
 import com.softdonating.service.BookService;
@@ -35,16 +37,21 @@ import net.sf.json.JSONObject;
 public class BookServiceImpl implements BookService {
 
 	@Override
-	public Books findBookByIsbn(String isbn) throws Exception {
+	public BookDetail findBookByIsbn(String isbn, Integer userId) throws Exception {
 		// 检查输入是否合法
-		if (isbn == null) {
+		if (isbn == null || userId == null) {
 			return null;
 		}
 		Books books = bookDao.findBookByIsbn(isbn);
 		// 判断书籍是否存在，存在则直接调用查看数据库的数据
 		if (books != null) {
-			books.setUsers(null);
-			return books;
+			Set<User> users = books.getUsers();
+			User user = userDao.findUserById(userId);
+			boolean weatherLikeThisBook = users.contains(user);
+			BookDetail bookDetail = new BookDetail(books.getBookId(), books.getIsbn(), 
+					books.getName(), books.getAuthor(), books.getPublisher(), 
+					books.getContent(), books.getPhoto(), books.getNumber(), weatherLikeThisBook);
+			return bookDetail;
 		} else {
 			// 如果书籍不存在，调用豆瓣开发工具找:
 			String temp = "https://api.douban.com/v2/book/isbn/";
@@ -98,28 +105,28 @@ public class BookServiceImpl implements BookService {
 		}
 		if (bookDao.insertBook(books)){
 			Books temp = bookDao.findBookByIsbn(isbn);
-			return temp;
+			BookDetail bookDetail = new BookDetail(temp.getBookId(), temp.getIsbn(), 
+					temp.getName(), temp.getAuthor(), temp.getPublisher(), temp.getContent(), 
+					temp.getPhoto(), temp.getNumber(), false);
+			return bookDetail;
 		}
 		return null;
 	}
 
-	
-
 	@Override
-	public Integer donateBook(Integer userId, BookWithNumber data) {
-		if (userId == null) {
+	public Integer donateBook(Integer userId, Integer bookId) {
+		if (bookId == null) {
 			return 404;
 		}
-		// 这里暂时改为不维护数目
-		int number = 1;//data.getNumber();
-		Books books = bookDao.findBookByIsbn(data.getIsbn());
-		// 对同一种书的多本书，转成多条记录进行保存
-		for (int i = 0; i < number; i++) {
-			Date donateTime = new Date();
-			Donate donate = new Donate(null, userId, books.getBookId(), -1, donateTime);
-			if (donateDao.createDonate(donate) == false) {
+		Books books = bookDao.findBookById(bookId);
+		if (books == null) {
+			return 404;
+		}
+		// 创建捐赠信息
+		Date donateTime = new Date();
+		Donate donate = new Donate(null, userId, bookId, -1, donateTime);
+		if (donateDao.createDonate(donate) == false) {
 				return -1;
-			}
 		}
 		return 200;
 	}
@@ -140,7 +147,7 @@ public class BookServiceImpl implements BookService {
 			} else {
 				Books temp = bookDao.findBookById(donate.getBookId());
 				UnconfirmDonateBook book = new UnconfirmDonateBook(temp.getBookId(), temp.getIsbn(), 
-						temp.getName(), temp.getAuthor(), temp.getPublisher(), temp.getContent(), 
+						temp.getName(), temp.getAuthor(), temp.getPublisher(), 
 						temp.getPhoto(), donate.getDonateId(), donate.getDonateTime());
 				books.add(book);
 			}
@@ -150,16 +157,17 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Integer confirmDonate(List<BookWithNumber> data, Integer userId) {
-		if (data == null || userId == null) {
+		if (data == null) {
 			// 没有可操作的数据
 			return 404;
 		}
 		for (BookWithNumber bookWithNumber : data) {
-			Books books = bookDao.findBookByIsbn(bookWithNumber.getIsbn());
-			// 找到donate
-			Donate donate = donateDao.findDonate(userId, books.getBookId());
+			Donate donate = donateDao.findDonateById(bookWithNumber.getDonateId());
+			if (donate == null | donate.getUserId() != userId){
+				return 404;
+			}
 			// 将原来记录的状态进行修改
-			if (!donateDao.confirmDonate(donate.getDonateId(), bookWithNumber.getNumber())) {
+			if (!donateDao.confirmDonate(bookWithNumber.getDonateId(), bookWithNumber.getNumber())) {
 				return -1;
 			}
 		}
@@ -167,11 +175,14 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public Integer createWithList(Integer userId, String isbn) {
-		if (userId == null || isbn == null) {
+	public Integer createWithList(Integer userId, Integer bookId) {
+		if (userId == null || bookId == null) {
 			return 404;
 		}
-		Books books = bookDao.findBookByIsbn(isbn);
+		Books books = bookDao.findBookById(bookId);
+		if (books == null) {
+			return -1;
+		}
 		if (userDao.addWishList(userId, books)) {
 			books.setFollowNumber(books.getFollowNumber() + 1);
 			if(bookDao.updateBook(books)) {
@@ -186,11 +197,14 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public Integer deleteWithList(Integer userId, String isbn) {
-		if (userId == null || isbn == null) {
+	public Integer deleteWithList(Integer userId, Integer bookId) {
+		if (userId == null || bookId == null) {
 			return 404;
 		}
-		Books books = bookDao.findBookByIsbn(isbn);
+		Books books = bookDao.findBookById(bookId);
+		if (books == null) {
+			return -1;
+		}
 		if (userDao.deleteWishList(userId, books)) {
 			books.setFollowNumber(books.getFollowNumber() - 1);
 			if (bookDao.updateBook(books)) {
@@ -205,18 +219,21 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public List<Books> getWishList(Integer userId) {
+	public List<BookListData> getWishList(Integer userId) {
 		if (userId == null) {
 			return null;
 		}
 		User user = userDao.findUserById(userId);
 		Set<Books> books = user.getBooks();
-		List<Books> wishList = new ArrayList<>();
+		List<BookListData> bookListData = new ArrayList<>();
 		for (Books i : books) {
-			i.setUsers(null);
-			wishList.add(i);
+			User userTemp = userDao.findUserById(userId);
+			boolean weatherLikeThisBook = i.getUsers().contains(userTemp);
+			BookListData temp = new BookListData(i.getBookId(), i.getIsbn(), i.getAuthor(), 
+					i.getName(), i.getPublisher(), i.getPhoto(), i.getNumber(), weatherLikeThisBook);
+			bookListData.add(temp);
 		}
-		return wishList;
+		return bookListData;
 	}
 
 	@Override
@@ -233,16 +250,20 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public Integer takeBook(Integer userId, String isbn) {
-		if (userId == null || isbn == null) {
+	public Integer takeBook(Integer userId, Integer bookId) {
+		if (userId == null || bookId == null) {
 			return 404;
 		}
-		Books books = bookDao.findBookByIsbn(isbn);
-		if (books.getNumber() < 1) {
-			// 库存不足
-			return -1;
+		User user = userDao.findUserById(userId);
+		if (user == null) {
+			return 404;
 		}
-		Donate donate = donateDao.findFirstDonate(isbn);
+		Books books = bookDao.findBookById(bookId);
+		if (books == null | books.getNumber() < 1) {
+			// 库存不足
+			return -2;
+		}
+		Donate donate = donateDao.findFirstDonate(books.getIsbn());
 		Date takeTime = new Date();
 		if (donate == null) {
 			return -1;
@@ -253,9 +274,18 @@ public class BookServiceImpl implements BookService {
 			Books temp = bookDao.findBookById(donate.getBookId());
 			User tempUser = userDao.findUserById(donate.getUserId());
 			Message.sendMs(tempUser.getPhoneNumber(), temp.getName());
+			Set<Books> book = user.getBooks();
+			if (book.contains(books)){
+				book.remove(books);
+				user.setBooks(book);
+				userDao.updateUser(user);
+				books.setFollowNumber(books.getFollowNumber() - 1);
+			}
+			books.setNumber(books.getNumber() - 1);
+			bookDao.updateBook(books);
 			return 200;
 		}
-		return -2;
+		return -1;
 	}
 
 	@Override
@@ -314,11 +344,14 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public Integer deleteUnconfirmedDonating(Integer donateId) {
+	public Integer deleteUnconfirmedDonating(Integer donateId, Integer userId) {
 		Donate donate = donateDao.findDonateById(donateId);
 		if (donate.getStatus() != -1) {
 			return -1;
 		} 
+		if (donate.getUserId() != userId) {
+			return 404;
+		}
 		if (donateDao.deleteDonate(donateId)){
 			return 200;
 		} else {
@@ -327,15 +360,34 @@ public class BookServiceImpl implements BookService {
 	}
 	
 	@Override
-	public List<Books> bestBooks() {
-		List<Books> books = new ArrayList<>();
-		books = bookDao.allBooks();		
+	public List<BookListData> bestBooks(Integer userId) {
+		if (userId == null) {
+			return null;
+		}
+		User user = userDao.findUserById(userId);
+		if (user == null) {
+			return null;
+		}
+		List<BookListData> bookList = new ArrayList<>();
+		List<Books> books = bookDao.allBooks();		
 		int booksNumber = bookDao.numberOfKindOfBook();
 		// 如果图书数目不够10本，则推荐所有图书
 		if (booksNumber <= 10){
-			return books;
+			BookListData temp = null;
+			Books tempBook = null;
+			boolean weatherLikeThisBook = false;
+			Set<Books> book = user.getBooks();
+			for (int i = 0; i < booksNumber; i++){
+				tempBook = books.get(i);
+				weatherLikeThisBook = book.contains(tempBook);
+				temp = new BookListData(tempBook.getBookId(), tempBook.getIsbn(), tempBook.getAuthor(), 
+						tempBook.getName(), tempBook.getPublisher(), tempBook.getPhoto(), 
+						tempBook.getFollowNumber(), weatherLikeThisBook);
+				bookList.add(temp);
+			}
+			return bookList;
 		}
-		// 通过查看加入心愿单的人数，来进行排名
+		// 图书数目超过10本，通过查看加入心愿单的人数，来进行排名
 		int[] temp = new int[booksNumber];
 		int[] sort = new int[booksNumber];
 		for (int i = 0; i < booksNumber; i++) {
@@ -354,9 +406,18 @@ public class BookServiceImpl implements BookService {
 				}
 			}
 		}
-		List<Books> answer = new ArrayList<>();
+		List<BookListData> answer = new ArrayList<>();
+		BookListData tempBookListData = null;
+		Books tempBooks = null;
+		boolean weatherLikeThisBook = false;
+		Set<Books> book = user.getBooks();
 		for (int i = 0; i < 10; i++) {
-			answer.add(books.get(sort[i]));
+			tempBooks = books.get(sort[i]);
+			weatherLikeThisBook = book.contains(tempBooks);
+			tempBookListData = new BookListData(tempBooks.getBookId(), tempBooks.getIsbn(), 
+					tempBooks.getAuthor(), tempBooks.getName(), tempBooks.getPublisher(), 
+					tempBooks.getPhoto(), tempBooks.getFollowNumber(), weatherLikeThisBook);
+			answer.add(tempBookListData);
 		}
 		return answer;
 	}

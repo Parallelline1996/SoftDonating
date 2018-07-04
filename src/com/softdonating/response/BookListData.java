@@ -1,52 +1,49 @@
 package com.softdonating.response;
 
-import java.util.Date;
-
-public class UnconfirmDonateBook {
+public class BookListData {
 
 	private Integer bookId;
-    private String isbn;
-    private String name;
-    private String author;
+	private String isbn;
+	private String author;
+	private String name;
     private String publisher;
     private String photo;
-    private Integer donateId;
-    private Date donateTime;
-	
-    public UnconfirmDonateBook() {
+    private Integer number;
+    private boolean weatherLikeThisBook;	
+    public BookListData() {
 	}
-
-    
-	public UnconfirmDonateBook(Integer bookId, String isbn, String name, String author, String publisher, String photo,
-			Integer donateId, Date donateTime) {
+    @Override
+	public String toString() {
+		return "BookListData [bookId=" + bookId + ", isbn=" + isbn + ", author=" + author + ", name=" + name
+				+ ", publisher=" + publisher + ", photo=" + photo + ", number=" + number + ", weatherLikeThisBook="
+				+ weatherLikeThisBook + "]";
+	}
+	public BookListData(Integer bookId, String isbn, String author, String name, String publisher, String photo,
+			Integer number, boolean weatherLikeThisBook) {
 		super();
 		this.bookId = bookId;
 		this.isbn = isbn;
-		this.name = name;
 		this.author = author;
+		this.name = name;
 		this.publisher = publisher;
 		this.photo = photo;
-		this.donateId = donateId;
-		this.donateTime = donateTime;
+		this.number = number;
+		this.weatherLikeThisBook = weatherLikeThisBook;
 	}
-
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
 		result = prime * result + ((bookId == null) ? 0 : bookId.hashCode());
-		result = prime * result + ((donateId == null) ? 0 : donateId.hashCode());
-		result = prime * result + ((donateTime == null) ? 0 : donateTime.hashCode());
 		result = prime * result + ((isbn == null) ? 0 : isbn.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((number == null) ? 0 : number.hashCode());
 		result = prime * result + ((photo == null) ? 0 : photo.hashCode());
 		result = prime * result + ((publisher == null) ? 0 : publisher.hashCode());
+		result = prime * result + (weatherLikeThisBook ? 1231 : 1237);
 		return result;
 	}
-
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -55,7 +52,7 @@ public class UnconfirmDonateBook {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UnconfirmDonateBook other = (UnconfirmDonateBook) obj;
+		BookListData other = (BookListData) obj;
 		if (author == null) {
 			if (other.author != null)
 				return false;
@@ -65,16 +62,6 @@ public class UnconfirmDonateBook {
 			if (other.bookId != null)
 				return false;
 		} else if (!bookId.equals(other.bookId))
-			return false;
-		if (donateId == null) {
-			if (other.donateId != null)
-				return false;
-		} else if (!donateId.equals(other.donateId))
-			return false;
-		if (donateTime == null) {
-			if (other.donateTime != null)
-				return false;
-		} else if (!donateTime.equals(other.donateTime))
 			return false;
 		if (isbn == null) {
 			if (other.isbn != null)
@@ -86,6 +73,11 @@ public class UnconfirmDonateBook {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (number == null) {
+			if (other.number != null)
+				return false;
+		} else if (!number.equals(other.number))
+			return false;
 		if (photo == null) {
 			if (other.photo != null)
 				return false;
@@ -96,84 +88,58 @@ public class UnconfirmDonateBook {
 				return false;
 		} else if (!publisher.equals(other.publisher))
 			return false;
+		if (weatherLikeThisBook != other.weatherLikeThisBook)
+			return false;
 		return true;
 	}
-
-
-	@Override
-	public String toString() {
-		return "UnconfirmDonateBook [bookId=" + bookId + ", isbn=" + isbn + ", name=" + name + ", author=" + author
-				+ ", publisher=" + publisher + ", photo=" + photo + ", donateId=" + donateId + ", donateTime="
-				+ donateTime + "]";
-	}
-
-
 	public Integer getBookId() {
 		return bookId;
 	}
-
 	public void setBookId(Integer bookId) {
 		this.bookId = bookId;
 	}
-
 	public String getIsbn() {
 		return isbn;
 	}
-
 	public void setIsbn(String isbn) {
 		this.isbn = isbn;
 	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getAuthor() {
 		return author;
 	}
-
 	public void setAuthor(String author) {
 		this.author = author;
 	}
-
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	public String getPublisher() {
 		return publisher;
 	}
-
 	public void setPublisher(String publisher) {
 		this.publisher = publisher;
 	}
-
 	public String getPhoto() {
 		return photo;
 	}
-
 	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
-
-	public Integer getDonateId() {
-		return donateId;
+	public Integer getNumber() {
+		return number;
 	}
-
-	public void setDonateId(Integer donateId) {
-		this.donateId = donateId;
+	public void setNumber(Integer number) {
+		this.number = number;
 	}
-
-	public Date getDonateTime() {
-		return donateTime;
+	public boolean isWeatherLikeThisBook() {
+		return weatherLikeThisBook;
 	}
-
-	public void setDonateTime(Date donateTime) {
-		this.donateTime = donateTime;
+	public void setWeatherLikeThisBook(boolean weatherLikeThisBook) {
+		this.weatherLikeThisBook = weatherLikeThisBook;
 	}
-    
-	
-   
     
     
 }
