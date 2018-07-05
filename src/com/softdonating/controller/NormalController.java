@@ -10,37 +10,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.softdonating.domain.Books;
 import com.softdonating.response.BookListData;
 import com.softdonating.service.BookService;
+import com.softdonating.service.NormalService;
 
 @Controller
 public class NormalController {
 	
 	
-	// 图片、题目、作者、出版社、isbn、库存、是否被收藏、bookId
-	// 返回热门推荐的图书 —— 10本
+
+	/**
+	 * 热门图书推荐(推荐被加入心愿单人数最多的十本书)
+	 * @param response
+	 * @return
+	 */
 	@ResponseBody
 	@RequestMapping("/hotBook")
 	public List<BookListData> getBookList(HttpServletResponse response){
-		Integer userId = null;
-		Cookie[] cookies = request.getCookies();
-		for (Cookie cookie : cookies) {
-			if (cookie.getName().equals("userId")){
-				userId = Integer.parseInt(cookie.getValue());
-				break;
-			}
-		}
+		Integer userId = getUserId();
 		return bookService.bestBooks(userId);
 	}
 	
 	// 补全
 
 
-	// 搜索，前后补全
+	/**
+	 * 搜索图书信息
+	 * @param bookName 搜索的图书名
+	 * @return 匹配到的图书列表
+	 */
+	@ResponseBody
+	@RequestMapping("/sortBooks")
+	public List<BookListData> sortBooks(@RequestBody Books bookName){
+		Integer userId = getUserId();
+		return normalService.sortBooks(bookName.getName(), userId);
+	}
 	
 	
 	/**
@@ -65,9 +74,25 @@ public class NormalController {
 	}
 	
 	@Autowired
+	@Qualifier("normalServiceImpl")
+	private NormalService normalService;
+	
+	@Autowired
 	@Qualifier("bookServiceImpl")
 	private BookService bookService;
 	
 	@Autowired
 	private HttpServletRequest request;
+	
+	private Integer getUserId(){
+		Integer userId = null;
+		Cookie[] cookies = request.getCookies();
+		for (Cookie cookie : cookies) {
+			if (cookie.getName().equals("userId")){
+				userId = Integer.parseInt(cookie.getValue());
+				break;
+			}
+		}
+		return userId;
+	}
 }

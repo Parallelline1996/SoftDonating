@@ -3,6 +3,7 @@ package com.softdonating.daoImpl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,40 @@ public class BookDaoImpl extends HibernateUtil implements BookDao {
 			session.close();
 		}
 		return books;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<Books> sortBooks(String bookName) {
+		//String hql = "from book where name like '%学习%'";
+		String hql = "from Books where name like :name";
+		Session session = sessionFactory.openSession();
+		List<Object> objects = null;
+		List<Books> books = new ArrayList<>();
+		System.out.println(bookName);
+		try {
+			//objects = (List<Object>)session.createSQLQuery(hql).setParameter(0, bookName).list();
+			//objects = (List<Object>)session.createSQLQuery(hql).list();
+			Query query = session.createQuery(hql);
+			query.setString("name", "%" + bookName + "%");
+			objects = query.list();
+			if (objects == null){
+				return books;
+			}
+			for (Object object : objects) {
+				books.add((Books)object);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			session.close();
+		}
+		return books;
+	}
+
+	@Override
+	public List<String> complete(String bookName) {
+		return null;
 	}
 
 }

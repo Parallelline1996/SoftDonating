@@ -229,8 +229,7 @@ public class BookServiceImpl implements BookService {
 		for (Books i : books) {
 			User userTemp = userDao.findUserById(userId);
 			boolean weatherLikeThisBook = i.getUsers().contains(userTemp);
-			BookListData temp = new BookListData(i.getBookId(), i.getIsbn(), i.getAuthor(), 
-					i.getName(), i.getPublisher(), i.getPhoto(), i.getNumber(), weatherLikeThisBook);
+			BookListData temp = new BookListData(i, weatherLikeThisBook);
 			bookListData.add(temp);
 		}
 		return bookListData;
@@ -380,9 +379,7 @@ public class BookServiceImpl implements BookService {
 			for (int i = 0; i < booksNumber; i++){
 				tempBook = books.get(i);
 				weatherLikeThisBook = book.contains(tempBook);
-				temp = new BookListData(tempBook.getBookId(), tempBook.getIsbn(), tempBook.getAuthor(), 
-						tempBook.getName(), tempBook.getPublisher(), tempBook.getPhoto(), 
-						tempBook.getFollowNumber(), weatherLikeThisBook);
+				temp = new BookListData(tempBook, weatherLikeThisBook);
 				bookList.add(temp);
 			}
 			return bookList;
@@ -414,9 +411,7 @@ public class BookServiceImpl implements BookService {
 		for (int i = 0; i < 10; i++) {
 			tempBooks = books.get(sort[i]);
 			weatherLikeThisBook = book.contains(tempBooks);
-			tempBookListData = new BookListData(tempBooks.getBookId(), tempBooks.getIsbn(), 
-					tempBooks.getAuthor(), tempBooks.getName(), tempBooks.getPublisher(), 
-					tempBooks.getPhoto(), tempBooks.getFollowNumber(), weatherLikeThisBook);
+			tempBookListData = new BookListData(tempBooks, weatherLikeThisBook);
 			answer.add(tempBookListData);
 		}
 		return answer;

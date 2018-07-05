@@ -21,4 +21,8 @@ public interface BookDao {
 	boolean insertBook(Books books);
 	
 	List<Books> allBooks();
+	
+	List<Books> sortBooks(String bookName);
+	
+	List<String> complete(String bookName);
 }

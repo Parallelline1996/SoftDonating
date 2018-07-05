@@ -1,5 +1,7 @@
 package com.softdonating.response;
 
+import com.softdonating.domain.Books;
+
 public class BookListData {
 
 	private Integer bookId;
@@ -9,17 +11,23 @@ public class BookListData {
     private String publisher;
     private String photo;
     private Integer number;
+    private Integer followNumber;
     private boolean weatherLikeThisBook;	
+    public BookListData(Books books, boolean weatherLikeThisBook){
+		this.bookId = books.getBookId();
+		this.isbn = books.getIsbn();
+		this.author = books.getAuthor();
+		this.name = books.getName();
+		this.publisher = books.getPublisher();
+		this.photo = books.getPhoto();
+		this.number = books.getNumber();
+		this.followNumber = books.getFollowNumber();
+		this.weatherLikeThisBook = weatherLikeThisBook;
+    }
     public BookListData() {
 	}
-    @Override
-	public String toString() {
-		return "BookListData [bookId=" + bookId + ", isbn=" + isbn + ", author=" + author + ", name=" + name
-				+ ", publisher=" + publisher + ", photo=" + photo + ", number=" + number + ", weatherLikeThisBook="
-				+ weatherLikeThisBook + "]";
-	}
-	public BookListData(Integer bookId, String isbn, String author, String name, String publisher, String photo,
-			Integer number, boolean weatherLikeThisBook) {
+    public BookListData(Integer bookId, String isbn, String author, String name, String publisher, String photo,
+			Integer number, Integer followNumber, boolean weatherLikeThisBook) {
 		super();
 		this.bookId = bookId;
 		this.isbn = isbn;
@@ -28,6 +36,7 @@ public class BookListData {
 		this.publisher = publisher;
 		this.photo = photo;
 		this.number = number;
+		this.followNumber = followNumber;
 		this.weatherLikeThisBook = weatherLikeThisBook;
 	}
 	@Override
@@ -36,6 +45,7 @@ public class BookListData {
 		int result = 1;
 		result = prime * result + ((author == null) ? 0 : author.hashCode());
 		result = prime * result + ((bookId == null) ? 0 : bookId.hashCode());
+		result = prime * result + ((followNumber == null) ? 0 : followNumber.hashCode());
 		result = prime * result + ((isbn == null) ? 0 : isbn.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((number == null) ? 0 : number.hashCode());
@@ -62,6 +72,11 @@ public class BookListData {
 			if (other.bookId != null)
 				return false;
 		} else if (!bookId.equals(other.bookId))
+			return false;
+		if (followNumber == null) {
+			if (other.followNumber != null)
+				return false;
+		} else if (!followNumber.equals(other.followNumber))
 			return false;
 		if (isbn == null) {
 			if (other.isbn != null)
@@ -91,6 +106,12 @@ public class BookListData {
 		if (weatherLikeThisBook != other.weatherLikeThisBook)
 			return false;
 		return true;
+	}
+	@Override
+	public String toString() {
+		return "BookListData [bookId=" + bookId + ", isbn=" + isbn + ", author=" + author + ", name=" + name
+				+ ", publisher=" + publisher + ", photo=" + photo + ", number=" + number + ", followNumber="
+				+ followNumber + ", weatherLikeThisBook=" + weatherLikeThisBook + "]";
 	}
 	public Integer getBookId() {
 		return bookId;
@@ -134,12 +155,17 @@ public class BookListData {
 	public void setNumber(Integer number) {
 		this.number = number;
 	}
+	public Integer getFollowNumber() {
+		return followNumber;
+	}
+	public void setFollowNumber(Integer followNumber) {
+		this.followNumber = followNumber;
+	}
 	public boolean isWeatherLikeThisBook() {
 		return weatherLikeThisBook;
 	}
 	public void setWeatherLikeThisBook(boolean weatherLikeThisBook) {
 		this.weatherLikeThisBook = weatherLikeThisBook;
 	}
-    
     
 }
