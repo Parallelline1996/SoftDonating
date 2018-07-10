@@ -24,6 +24,7 @@ import com.softdonating.domain.Take;
 import com.softdonating.domain.User;
 import com.softdonating.request.BookWithNumber;
 import com.softdonating.response.BookDetail;
+import com.softdonating.response.BookDetailWithLike;
 import com.softdonating.response.BookListData;
 import com.softdonating.response.BookRecord;
 import com.softdonating.response.UnconfirmDonateBook;
@@ -43,19 +44,23 @@ public class BookServiceImpl implements BookService {
 			return null;
 		}
 		Books books = bookDao.findBookByIsbn(isbn);
+		
 		// 判断书籍是否存在，存在则直接调用查看数据库的数据
 		if (books != null) {
+			// 判断用户是否将该图书加入心愿单
 			Set<User> users = books.getUsers();
 			User user = userDao.findUserById(userId);
 			boolean weatherLikeThisBook = users.contains(user);
+			
+			// 封装图书信息
 			BookDetail bookDetail = new BookDetail(books.getBookId(), books.getIsbn(), 
 					books.getName(), books.getAuthor(), books.getPublisher(), 
 					books.getContent(), books.getPhoto(), books.getNumber(), weatherLikeThisBook);
 			return bookDetail;
 		} else {
+			System.out.println("在数据库中找不到对应的图书");
 			// 如果书籍不存在，调用豆瓣开发工具找:
-			String temp = "https://api.douban.com/v2/book/isbn/";
-			temp = temp + isbn;
+			String temp = "https://api.douban.com/v2/book/isbn/" + isbn;
 			BufferedReader bReader = null;
 			StringBuilder stringBuilder = new StringBuilder(); 
 			HttpURLConnection connection = null;
@@ -64,11 +69,13 @@ public class BookServiceImpl implements BookService {
 				URL url = new URL(temp);
 				// 创建链接
 				connection = (HttpURLConnection)url.openConnection();
-				if (connection == null){
-					return null;
-				}
 				// 进行链接
 				connection.connect();
+				// 对返回码进行判断，如果为非200，即显示找不到图书
+				System.out.println(connection.getResponseCode());
+				if (connection.getResponseCode() != 200){
+					return new BookDetail(-1, null, null, null, null, null, null, null, false);
+				}
 				// 打开流
 				bReader = new BufferedReader(
 						new InputStreamReader(connection.getInputStream(), "UTF-8"));
@@ -78,6 +85,7 @@ public class BookServiceImpl implements BookService {
 				}
 				// 关闭流
 				bReader.close();
+				
 				JSONObject jsonObject = JSONObject.fromObject(stringBuilder.toString());
 				String name = jsonObject.get("subtitle").toString();
 				String author = jsonObject.get("author").toString();
@@ -89,13 +97,21 @@ public class BookServiceImpl implements BookService {
 				JSONObject array = JSONObject.fromObject(jsonObject.get("images").toString());
 				// 这里差一个默认图片
 				String photo = array.get("small").toString();
-				// 照片这里出现问题
 				System.out.println(name);
 				System.out.println(author);
 				System.out.println(publisher);
 				System.out.println(content);
 				System.out.println(photo);
-				books = new Books(0, isbn, name, author, publisher, content, photo, 0, 0, null);
+				
+				// 对作者的格式进行处理
+				StringBuilder authorNew = new StringBuilder();
+				for (int i = 0; i < author.length(); i++) {
+					char aString = author.charAt(i);
+					if (aString != '[' && aString != ']' && aString != '"'){
+						authorNew.append(aString);
+					}
+				}
+				books = new Books(0, isbn, name, authorNew.toString(), publisher, content, photo, 0, 0, null);
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} finally {
@@ -103,6 +119,8 @@ public class BookServiceImpl implements BookService {
 				connection.disconnect();
 			}
 		}
+		
+		// 将获取的图书信息插入到数据库中
 		if (bookDao.insertBook(books)){
 			Books temp = bookDao.findBookByIsbn(isbn);
 			BookDetail bookDetail = new BookDetail(temp.getBookId(), temp.getIsbn(), 
@@ -115,37 +133,48 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Integer donateBook(Integer userId, Integer bookId) {
-		if (bookId == null) {
+		// 对输入进行判断
+		if (bookId == null || userId == null) {
 			return 404;
 		}
 		Books books = bookDao.findBookById(bookId);
 		if (books == null) {
 			return 404;
 		}
+		
 		// 创建捐赠信息
 		Date donateTime = new Date();
 		Donate donate = new Donate(null, userId, bookId, -1, donateTime);
-		if (donateDao.createDonate(donate) == false) {
-				return -1;
+		if (!donateDao.createDonate(donate)) {
+			return -1;
 		}
 		return 200;
 	}
 	
 	@Override
 	public List<UnconfirmDonateBook> getUnconfirmedDonate(Integer userId) {
+		// 对输入进行判断
 		if (userId == null) {
 			return null;
 		}
+		User user = userDao.findUserById(userId);
+		if (user == null) {
+			return null;
+		}
+		
+		// 获得未确定的捐赠信息，并进行数据的封装和判断
 		List<Donate> donates = donateDao.getUnconfirmedList(userId);
 		List<UnconfirmDonateBook> books = new ArrayList<>();
 		for (Donate donate : donates) {
+			// 如果捐赠时间超过3天，仍未进行确定，将被自动清除
 			Date date = new Date(new Date().getTime() - 3 * 86400000);
-			// 如果捐赠时间超过3天，被自动清除
 			if (date.after(donate.getDonateTime())) {
 				donateDao.deleteDonate(donate.getDonateId());
 				continue;
 			} else {
 				Books temp = bookDao.findBookById(donate.getBookId());
+				
+				// 对数据进行重新的封装
 				UnconfirmDonateBook book = new UnconfirmDonateBook(temp.getBookId(), temp.getIsbn(), 
 						temp.getName(), temp.getAuthor(), temp.getPublisher(), 
 						temp.getPhoto(), donate.getDonateId(), donate.getDonateTime());
@@ -157,15 +186,18 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Integer confirmDonate(List<BookWithNumber> data, Integer userId) {
-		if (data == null) {
-			// 没有可操作的数据
+		// 对输入进行判断：
+		if (data == null || userId == null) {
 			return 404;
 		}
+		
+		// 对于每一组捐赠的数据（图书 + 数目）进行确认操作
 		for (BookWithNumber bookWithNumber : data) {
 			Donate donate = donateDao.findDonateById(bookWithNumber.getDonateId());
 			if (donate == null | donate.getUserId() != userId){
 				return 404;
 			}
+			
 			// 将原来记录的状态进行修改
 			if (!donateDao.confirmDonate(bookWithNumber.getDonateId(), bookWithNumber.getNumber())) {
 				return -1;
@@ -250,6 +282,7 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Integer takeBook(Integer userId, Integer bookId) {
+		// 对输入进行判断
 		if (userId == null || bookId == null) {
 			return 404;
 		}
@@ -272,6 +305,8 @@ public class BookServiceImpl implements BookService {
 		if (takeDao.createTake(take, donate.getDonateId())) {
 			Books temp = bookDao.findBookById(donate.getBookId());
 			User tempUser = userDao.findUserById(donate.getUserId());
+			
+			// 发送短信
 			Message.sendMs(tempUser.getPhoneNumber(), temp.getName());
 			Set<Books> book = user.getBooks();
 			if (book.contains(books)){
@@ -289,9 +324,11 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Integer numberOfDonates(Integer userId) {
+		// 有bug
 		if (userId == null) {
 			return -1;
 		}
+		// 这里要加上donate的数目
 		return takeDao.numberOfDonate(userId);
 	}
 
@@ -417,6 +454,22 @@ public class BookServiceImpl implements BookService {
 		return answer;
 	}
 	
+	@Override
+	public BookDetailWithLike findBookByBookId(Integer userId, Integer bookId) {
+		if (userId == null || bookId == null) {
+			return null;
+		}
+		User user = userDao.findUserById(userId);
+		Books books = bookDao.findBookById(bookId);
+		if (user == null || books == null) {
+			return null;
+		}
+		Set<Books> book = user.getBooks();
+		boolean weatherLikeThisBook = book.contains(books);
+		BookDetailWithLike data = new BookDetailWithLike(books, weatherLikeThisBook);
+		return data;
+	}
+	
 	@Autowired
 	@Qualifier("bookDaoImpl")
 	private BookDao bookDao;
@@ -432,6 +485,7 @@ public class BookServiceImpl implements BookService {
 	@Autowired
 	@Qualifier("takeDaoImpl")
 	private TakeDao takeDao;
+
 
 	
 }

@@ -22,13 +22,9 @@ import net.sf.json.JSONObject;
 @Qualifier("accountServiceImpl")
 public class AccountServiceImpl implements AccountService {
 	
-	
+	// 小程序的相关信息
 	private final String APPID = "wx4f6638e0c15aefbf";
 	private final String APPSECRET = "0b929c6afb6fd739c69ce9b58cf7653a";
-	
-	@Autowired
-	@Qualifier("userDaoImpl")
-	private UserDao userDao;
 
 	@Override
 	public User findUserById(Integer userId) {
@@ -36,7 +32,7 @@ public class AccountServiceImpl implements AccountService {
 			return null;
 		}
 		User user = userDao.findUserById(userId);
-		// 将关注的图书置为null，防止循环读取，如果需要再将这个进行转换
+		// 防止转换为JSON时出现循环
 		user.setBooks(null);
 		return user;
 	}
@@ -57,13 +53,12 @@ public class AccountServiceImpl implements AccountService {
 				+ "&secret=" + APPSECRET + "&js_code=" + code + "&grant_type=authorization_code";
 		StringBuilder stringBuilder = new StringBuilder();
 		try {
+			// 创建URL，并连接到微信接口
 			URL url = new URL(address);
 			HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-			if (connection == null){
-				// 链接错误的时候怎么处理，这个得后期重新写
-				return null;
-			}
 			connection.connect();
+			
+			// 获取数据流，进行操作
 			BufferedReader bReader = new BufferedReader(
 					new InputStreamReader(connection.getInputStream(), "utf-8"));
 			String line = null;
@@ -75,7 +70,8 @@ public class AccountServiceImpl implements AccountService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// 将JSON文件进行解析
+		
+		// 将JSON文件进行解析，获取openid和session_key
 		JSONObject jsonObject = JSONObject.fromObject(stringBuilder.toString());
 		String openId = jsonObject.get("openid").toString();
 		String sessionKey = jsonObject.get("session_key").toString();
@@ -93,11 +89,13 @@ public class AccountServiceImpl implements AccountService {
 			// 查不到信息，表示为第一次登陆
 			user = new User(0, openId, null, null, null, null, null, null);
 			userDao.createUser(user);
+			
+			// 获取用户ID，并放入map进行返回
 			user = userDao.findUserByCode(openId);
 			map.put("userId", user.getUserId().toString());
 			map.put("code", "1");
 		} else {
-			// 搜得到信息，并非第一次登陆
+			// 可以匹配到数据，并非第一次登陆
 			map.put("userId", user.getUserId().toString());
 			map.put("code", "100");
 		}
@@ -122,5 +120,8 @@ public class AccountServiceImpl implements AccountService {
 		}
 		return -1;
 	}
-
+	
+	@Autowired
+	@Qualifier("userDaoImpl")
+	private UserDao userDao;
 }

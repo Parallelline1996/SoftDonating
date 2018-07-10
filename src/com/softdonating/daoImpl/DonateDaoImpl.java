@@ -58,12 +58,17 @@ public class DonateDaoImpl extends HibernateUtil implements DonateDao {
 			if (donate.getStatus() == 1) {
 				return false;
 			}
+			// 更新捐赠状态和捐赠时间
 			donate.setStatus(1);
 			Date donateTime = new Date();
 			donate.setDonateTime(donateTime);
+			
+			// 更新库存
 			Books books = bookDao.findBookById(donate.getBookId());
 			books.setNumber(books.getNumber() + number);
 			temp = update(donate) && update(books);
+			
+			// 若数目超过一本，插入其他的捐赠纪录
 			for(int i = 0; i < number - 1; i ++) {
 				Date date = new Date(new Date().getTime() + (i + 1) * 1000);
 				Donate donateTemp = new Donate(null, donate.getUserId(), donate.getBookId(), 1, date);
@@ -147,14 +152,6 @@ public class DonateDaoImpl extends HibernateUtil implements DonateDao {
 		return donate;
 	}
 
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Autowired
-	@Qualifier("bookDaoImpl")
-	private BookDao bookDao;
-
 	@Override
 	public Donate findDonateById(Integer donateId) {
 		Session session = sessionFactory.openSession();
@@ -168,5 +165,14 @@ public class DonateDaoImpl extends HibernateUtil implements DonateDao {
 		}
 		return donate;
 	}
+	
+
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
+	
+	@Autowired
+	@Qualifier("bookDaoImpl")
+	private BookDao bookDao;
 
 }

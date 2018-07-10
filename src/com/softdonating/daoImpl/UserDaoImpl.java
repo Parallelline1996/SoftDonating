@@ -51,10 +51,6 @@ public class UserDaoImpl extends HibernateUtil implements UserDao {
 		return user;
 	}
 
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-
 	@Override
 	public boolean addWishList(Integer userId, Books books) {
 		User user = findUserById(userId);
@@ -84,5 +80,8 @@ public class UserDaoImpl extends HibernateUtil implements UserDao {
 	public boolean updateUser(User user) {
 		return update(user);
 	}
-
+	
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
 }

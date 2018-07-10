@@ -20,14 +20,6 @@ import com.softdonating.util.HibernateUtil;
 @Qualifier("takeDaoImpl")
 public class TakeDaoImpl extends HibernateUtil implements TakeDao {
 
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
-	@Autowired
-	@Qualifier("donateDaoImpl")
-	private DonateDao donateDao;
-	
 	@Override
 	public boolean createTake(Take take, Integer donateId) {
 		Session session = sessionFactory.openSession();
@@ -100,4 +92,12 @@ public class TakeDaoImpl extends HibernateUtil implements TakeDao {
 		return takes;
 	}
 
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
+	
+	@Autowired
+	@Qualifier("donateDaoImpl")
+	private DonateDao donateDao;
+	
 }

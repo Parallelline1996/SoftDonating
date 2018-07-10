@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.softdonating.domain.User;
 import com.softdonating.request.BookWithNumber;
 import com.softdonating.response.BookDetail;
+import com.softdonating.response.BookDetailWithLike;
 import com.softdonating.response.BookListData;
 import com.softdonating.response.BookRecord;
 import com.softdonating.response.UnconfirmDonateBook;
@@ -160,6 +161,18 @@ public class UserController {
 		return bookService.findBookByIsbn(isbn, userId);
 	}
 	
+	/**
+	 * 通过图书ID查看具体的图书信息
+	 * @param bookId
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/getBookDataById")
+	public BookDetailWithLike getBookDataById(@RequestBody Integer bookId) {
+		Integer userId = getUserId();
+		return bookService.findBookByBookId(userId, bookId);
+	}
+	
 	
 	/**
 	 * 捐赠图书，加入待确定清单
@@ -170,9 +183,6 @@ public class UserController {
 	@RequestMapping("/donate")
 	public int Donate(@RequestBody Integer bookId) {
 		Integer userId = getUserId();
-		if (userId == null) {
-			return 404;
-		}
 		return bookService.donateBook(userId, bookId);
 	}
 	
@@ -184,9 +194,6 @@ public class UserController {
 	@RequestMapping("/unconfirmedDonatingList")
 	public List<UnconfirmDonateBook> unconfirmedDonatingList() {
 		Integer userId = getUserId();
-		if (userId == null) {
-			return null;
-		}
 		return bookService.getUnconfirmedDonate(userId);
 	}
 	
@@ -213,9 +220,6 @@ public class UserController {
 	@RequestMapping("/confirmDonating")
 	public int confirmDonating(@RequestBody List<BookWithNumber> data) {
 		Integer userId = getUserId();
-		if (userId == null) {
-			return 404;
-		}
 		return bookService.confirmDonate(data, userId);
 	}
 	
@@ -272,9 +276,6 @@ public class UserController {
 	@RequestMapping("/takeBook")
 	public int takeBook(@RequestBody Integer bookId) {
 		Integer userId = getUserId();
-		if (userId == null) {
-			return 404;
-		}
 		return bookService.takeBook(userId, bookId);
 	}
 	

@@ -18,10 +18,6 @@ import com.softdonating.util.HibernateUtil;
 @Qualifier("bookDaoImpl")
 public class BookDaoImpl extends HibernateUtil implements BookDao {
 
-	@Autowired
-	@Qualifier("sessionFactory")
-	private SessionFactory sessionFactory;
-	
 	@Override
 	public Books findBookByIsbn(String isbn) {
 		String hql = "from Books where isbn = " + isbn;
@@ -154,4 +150,8 @@ public class BookDaoImpl extends HibernateUtil implements BookDao {
 		return null;
 	}
 
+	@Autowired
+	@Qualifier("sessionFactory")
+	private SessionFactory sessionFactory;
+	
 }
