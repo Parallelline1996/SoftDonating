@@ -22,8 +22,6 @@ import com.softdonating.service.NormalService;
 @Controller
 public class NormalController {
 	
-	
-
 	/**
 	 * 热门图书推荐(推荐被加入心愿单人数最多的十本书)
 	 * @param response
